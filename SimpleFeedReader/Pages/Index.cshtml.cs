@@ -22,15 +22,12 @@ namespace SimpleFeedReader.Pages
                 try
                 {
                     feedUrl = new Uri(urlString);
+                    NewsItems = _repository.GetNewsItems(feedUrl);
                 }
                 catch(UriFormatException)
                 {
                     ErrorText = "There was a problem parsing the URL.";
                     return;
-                }
-                try
-                {
-                    NewsItems = _repository.GetNewsItems(feedUrl);
                 }
                 catch(AggregateException ae)
                 {
