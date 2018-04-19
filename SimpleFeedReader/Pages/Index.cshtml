@@ -1,0 +1,58 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+<h2>Simple Feed Reader</h2>
+<hr />
+<div class="row">
+    <div>
+        <form method="get">
+            <div class="form-group">
+                <label>
+                    Enter a feed URL:
+                    <input name="FeedUrl" id="FeedUrl" class="form-control" value="@Request.Query["feedurl"]" />
+                </label>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Retrieve Feed" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.ErrorText))
+    {
+        <div>
+            <h3>@Model.ErrorText</h3>
+        </div>
+    }
+    @if (Model.NewsItems != null && Model.NewsItems.Count > 0)
+    {
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Title
+                </th>
+                <th>
+                    Published
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.NewsItems)
+            {
+                <tr>
+                    <td>
+                        <a href="@item.Links.Where(l => l.RelationshipType != "comments").FirstOrDefault().Uri.ToString()" 
+                           target="_blank">@item.Title</a>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Published)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    }
+</div>
