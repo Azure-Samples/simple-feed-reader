@@ -1,18 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Xml;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.SyndicationFeed;
-using SimpleFeedReader.Models;
+using SimpleFeedReader.Repositories;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Xml;
 
 namespace SimpleFeedReader.Pages
 {
     public class IndexModel : PageModel
     {
-        NewsItemRepository _repository = new NewsItemRepository();
+        private readonly NewsItemRepository _newsItemRepository;
+
+        public IndexModel(NewsItemRepository newsItemRepository)
+        {
+            _newsItemRepository = newsItemRepository;
+        }
+
         public string ErrorText { get; set; }
+
         public List<ISyndicationItem> NewsItems { get; set; }
-        public void OnGet()
+
+        public async Task OnGet()
         {
             string urlString = Request.Query["feedurl"];
             Uri feedUrl = null;
@@ -22,7 +31,7 @@ namespace SimpleFeedReader.Pages
                 try
                 {
                     feedUrl = new Uri(urlString);
-                    NewsItems = _repository.GetNewsItems(feedUrl);
+                    NewsItems = await _newsItemRepository.GetNewsItems(feedUrl);
                 }
                 catch(UriFormatException)
                 {
@@ -42,9 +51,6 @@ namespace SimpleFeedReader.Pages
                     });
                 }
             }
-
-           
-            
         }
     }
 }
