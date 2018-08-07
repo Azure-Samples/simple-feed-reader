@@ -19,23 +19,21 @@
             </div>
         </form>
     </div>
+    
     @if (!string.IsNullOrEmpty(Model.ErrorText))
     {
         <div>
-            <h3>@Model.ErrorText</h3>
+            <h3 class="text-danger">@Model.ErrorText</h3>
         </div>
     }
-    @if (Model.NewsItems != null && Model.NewsItems.Count > 0)
+
+    @if (Model.NewsItems?.Count > 0)
     {
     <table class="table">
         <thead>
             <tr>
-                <th>
-                    Title
-                </th>
-                <th>
-                    Published
-                </th>
+                <th>Title</th>
+                <th>Published</th>
             </tr>
         </thead>
         <tbody>
@@ -43,16 +41,14 @@
             {
                 <tr>
                     <td>
-                        <a href="@item.Links.Where(l => l.RelationshipType != "comments").FirstOrDefault().Uri.ToString()" 
-                           target="_blank">@item.Title</a>
+                        <a href="@item.Uri" target="_blank">@item.Title</a>
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.Published)
+                        @item.Published.ToString("MMM dd, yyyy HH:mm:ss")
                     </td>
                 </tr>
             }
         </tbody>
     </table>
-
     }
 </div>

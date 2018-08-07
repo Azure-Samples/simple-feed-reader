@@ -1,44 +1,53 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.SyndicationFeed;
-using SimpleFeedReader.Repositories;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using SimpleFeedReader.Services;
+using SimpleFeedReader.ViewModels;
 
 namespace SimpleFeedReader.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly NewsItemRepository _newsItemRepository;
+        private readonly NewsService _newsService;
 
-        public IndexModel(NewsItemRepository newsItemRepository)
+        public IndexModel(NewsService newsService)
         {
-            _newsItemRepository = newsItemRepository;
+            _newsService = newsService;
         }
 
-        public string ErrorText { get; set; }
+        public string ErrorText { get; private set; }
 
-        public List<ISyndicationItem> NewsItems { get; set; }
+        public List<NewsStoryViewModel> NewsItems { get; private set; }
 
         public async Task OnGet()
         {
-            string urlString = Request.Query["feedurl"];
-            Uri feedUrl = null;
+            string feedUrl = Request.Query["feedurl"];
 
-            if (!string.IsNullOrEmpty(urlString))
+            if (!string.IsNullOrEmpty(feedUrl))
             {
                 try
                 {
-                    feedUrl = new Uri(urlString);
-                    NewsItems = await _newsItemRepository.GetNewsItems(feedUrl);
+                    NewsItems = await _newsService.GetNews(feedUrl);
                 }
-                catch(UriFormatException)
+                catch (UriFormatException)
                 {
                     ErrorText = "There was a problem parsing the URL.";
                     return;
                 }
-                catch(AggregateException ae)
+                catch (WebException ex) when (ex.Status == WebExceptionStatus.NameResolutionFailure)
+                {
+                    ErrorText = "Unknown host name.";
+                    return;
+                }
+                catch (WebException ex) when (ex.Status == WebExceptionStatus.ProtocolError)
+                {
+                    ErrorText = "Syndication feed not found.";
+                    return;
+                }
+                catch (AggregateException ae)
                 {
                     ae.Handle((x) =>
                     {
